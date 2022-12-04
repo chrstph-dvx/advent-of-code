@@ -1,9 +1,12 @@
-import { readInput } from "../../common/readInput.js";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+import path, { dirname } from "path";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const readInput = (dir) =>
+  fs.readFileSync(path.join(dir, "input.txt"), "utf8").split("\n\n");
 
 const partOne = async () => {
   const file = await readInput(__dirname);
