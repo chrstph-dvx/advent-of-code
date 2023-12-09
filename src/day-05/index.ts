@@ -18,7 +18,7 @@ function split(lines: string[]) {
   const temperatureToHumidity = lines.slice(temperatureToHumidityIndex + 1, humidityToLocationIndex)
   const humidityToLocation = lines.slice(humidityToLocationIndex + 1)
 
-  return {
+  return [
     seedToSoil,
     soilToFertilizer,
     fertilizerToWater,
@@ -26,7 +26,7 @@ function split(lines: string[]) {
     lightToTemperature,
     temperatureToHumidity,
     humidityToLocation,
-  }
+  ]
 }
 
 function getResultFromMap(map: string[], input: number) {
@@ -43,7 +43,7 @@ function getResultFromMap(map: string[], input: number) {
 export function part1() {
   const lines = parseLines(input)
   const seeds = lines[0].split('seeds: ')[1].split(' ').map(Number)
-  const {
+  const [
     seedToSoil,
     soilToFertilizer,
     fertilizerToWater,
@@ -51,7 +51,7 @@ export function part1() {
     lightToTemperature,
     temperatureToHumidity,
     humidityToLocation,
-  } = split(lines)
+  ] = split(lines)
 
   const locations = seeds.map((seed) => {
     const soil = getResultFromMap(seedToSoil, seed)
@@ -70,54 +70,41 @@ export function part1() {
 export function part2() {
   const lines = parseLines(input)
   const parsedSeeds = lines[0].split('seeds: ')[1].split(' ').map(Number)
-  const seedsChunks = []
+  let seedsChunks: [number, number] = []
   // Split in array of 2
   for (let i = 0; i < parsedSeeds.length; i += 2) {
     const chunk = parsedSeeds.slice(i, i + 2)
-    seedsChunks.push(chunk)
+    seedsChunks.push([chunk[0], chunk[0] + chunk[1]])
   }
 
-  const {
-    seedToSoil,
-    soilToFertilizer,
-    fertilizerToWater,
-    waterToLight,
-    lightToTemperature,
-    temperatureToHumidity,
-    humidityToLocation,
-  } = split(lines)
-
-  let min = Number.POSITIVE_INFINITY
-  for (const [start, length] of seedsChunks) {
-    for (let i = 0; i < length; i++) {
-      const seed = start + i
-      const soil = getResultFromMap(seedToSoil, seed)
-      const fertilizer = getResultFromMap(soilToFertilizer, soil)
-      const water = getResultFromMap(fertilizerToWater, fertilizer)
-      const light = getResultFromMap(waterToLight, water)
-      const temperature = getResultFromMap(lightToTemperature, light)
-      const humidity = getResultFromMap(temperatureToHumidity, temperature)
-      const location = getResultFromMap(humidityToLocation, humidity)
-      if (location < min) {
-        min = location
+  const maps = split(lines)
+  for (const map of maps) {
+    const newSeeds = []
+    while (seedsChunks.length > 0) {
+      const [start, end] = seedsChunks.pop()
+      let breaked = false
+      for (const line of map) {
+        const [destination, source, delta] = line.split(' ').map(Number)
+        const overlapStart = Math.max(start, source)
+        const overlapEnd = Math.min(end, source + delta)
+        if (overlapStart < overlapEnd) {
+          newSeeds.push([overlapStart - source + destination, overlapEnd - source + destination])
+          if (overlapStart > start) {
+            seedsChunks.push([start, overlapStart])
+          }
+          if (end > overlapEnd) {
+            seedsChunks.push([overlapEnd, end])
+          }
+          breaked = true
+          break
+        }
+      }
+      if (!breaked) {
+        newSeeds.push([start, end])
       }
     }
-    console.log(start, ' done')
+    seedsChunks = newSeeds
   }
 
-  return min
-
-  // const locations = seeds.map((seed) => {
-  //   const soil = getResultFromMap(seedToSoil, seed)
-  //   const fertilizer = getResultFromMap(soilToFertilizer, soil)
-  //   const water = getResultFromMap(fertilizerToWater, fertilizer)
-  //   const light = getResultFromMap(waterToLight, water)
-  //   const temperature = getResultFromMap(lightToTemperature, light)
-  //   const humidity = getResultFromMap(temperatureToHumidity, temperature)
-  //   const location = getResultFromMap(humidityToLocation, humidity)
-  //   return location
-  // })
-
-  // return Math.min(...locations)
-  return 0
+  return Math.min(...seedsChunks.map((chunks) => chunks[0]))
 }
