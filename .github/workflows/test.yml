@@ -22,7 +22,7 @@ jobs:
       matrix: ${{ steps.set-output.outputs.e2eFiles }}
     steps:
       - id: set-output
-        run: echo "e2eFiles=azerty" >> $GITHUB_OUTPUT
+        run: echo "e2eFiles=azerty2" >> $GITHUB_OUTPUT
 
 
   build:
@@ -31,7 +31,7 @@ jobs:
     needs: [load-files]
     if: |
       ${{ github.event.comment.body == '/run-cctp-tests' }} && ${{ contains(github.event.comment.html_url, '/pull/') }}
-      && needs.load-files.outputs.matrix === 'azerty'
+      && needs.load-files.outputs.matrix === 'azerty2'
     steps:
       - name: test
         run: echo "build running"
