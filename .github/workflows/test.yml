@@ -67,7 +67,8 @@ jobs:
             });
             
             const head_sha = pr.head.sha;
-            
+            const workflowUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+
             await github.rest.checks.create({
               owner,
               repo,
@@ -78,6 +79,6 @@ jobs:
               output: {
                 title: 'CCTP Tests Result',
                 summary: 'The CCTP tests have completed.',
-                text: 'Check the workflow run for more details.'
+                text: `For detailed information, please check the [workflow run](${workflowUrl}).`
               }
             });
