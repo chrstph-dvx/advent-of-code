@@ -4,11 +4,14 @@ on:
   issue_comment:
     types:
       - created
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   debug-log:
     name: "debug test"
     runs-on: ubuntu-latest
+    if: contains(fromJson('["OWNER", "MEMBER"]'), github.event.comment.author_association)
     steps:
       - name: "step"
         run: |
@@ -26,7 +29,6 @@ jobs:
       - id: set-output
         run: echo "e2eFiles=azerty2" >> $GITHUB_OUTPUT
 
-
   build:
     name: "Build"
     runs-on: ubuntu-latest
@@ -36,6 +38,38 @@ jobs:
       github.event.issue.pull_request != null &&
       needs.load-files.outputs.matrix == 'azerty2'
     steps:
-      - name: test
-        run: echo "build running 3"
-  
+      - name: Check if commenter is OWNER
+        run: |
+          if [[ "${{ github.event.comment.author_association }}" != "OWNER" ]]; then
+            echo "Error: Only repository owners can trigger the build step."
+            exit 1
+          fi
+
+  update-pr-status:
+    name: "Update PR Status"
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Create check run
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo;
+            
+            await github.rest.checks.create({
+              owner,
+              repo,
+              name: 'CCTP Tests',
+              head_sha: context.payload.comment.commit_id,
+              status: 'completed',
+              conclusion: '${{ job.status }}',
+              output: {
+                title: 'CCTP Tests Result',
+                summary: 'The CCTP tests have completed.',
+                text: 'Check the workflow run for more details.'
+              }
+            });
+
+            OWNER
