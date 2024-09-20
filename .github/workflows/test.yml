@@ -104,7 +104,7 @@ jobs:
             await github.rest.checks.create({
               owner,
               repo,
-              name: 'CCTP Tests',
+              name: 'CCTP Tests2',
               head_sha: head_sha,
               status: 'completed',
               conclusion: '${{ needs.build.result }}',
