@@ -94,17 +94,20 @@ jobs:
             // Construct the URL for this workflow run
             const workflowUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
             
-            // Create a new check suite
-              const { data: suite } = await github.rest.checks.createSuite({
-                owner,
-                repo,
-                head_sha: head_sha,
-              });
+            const checkName = 'CCTP E2E Tests';
+
+            // Check if a check run already exists
+            const { data: existingChecks } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: head_sha,
+              check_name: checkName,
+            });
               
             await github.rest.checks.create({
               owner,
               repo,
-              name: 'CCTP Tests',
+              name: 'CCTP Tests2',
               head_sha: head_sha,
               status: 'completed',
               conclusion: '${{ needs.build.result }}',
