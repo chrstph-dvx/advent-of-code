@@ -120,3 +120,5 @@ export const part2 = () => {
 | 23  |        |        |                               | [Day 23](https://adventofcode.com/2023/day/23) |
 | 24  |        |        |                               | [Day 24](https://adventofcode.com/2023/day/24) |
 | 25  |        |        |                               | [Day 25](https://adventofcode.com/2023/day/25) |
+
+change
