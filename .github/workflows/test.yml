@@ -14,6 +14,8 @@ jobs:
         run: |
           echo ${{ github.event.comment.body }}
           echo ${{ github.event.comment.author_association }}
+          echo ${{ github.event }}
+          echo ${{ github.event.issue.pull_request }}
 
   load-files:
     name: "Load files"
@@ -22,7 +24,7 @@ jobs:
       matrix: ${{ steps.set-output.outputs.e2eFiles }}
     steps:
       - id: set-output
-        run: echo "e2eFiles=azerty" >> $GITHUB_OUTPUT
+        run: echo "e2eFiles=azerty2" >> $GITHUB_OUTPUT
 
 
   build:
@@ -30,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [load-files]
     if: |
-      ${{ github.event.comment.body == '/run-cctp-tests' }} && ${{ contains(github.event.comment.html_url, '/pull/') }}
-      && needs.load-files.outputs.matrix === 'azerty'
+      ${{ github.event.comment.body == '/run-cctp-tests' }} && github.event.issue.pull_request
+      && needs.load-files.outputs.matrix == 'azerty2'
     steps:
       - name: test
         run: echo "build running"
