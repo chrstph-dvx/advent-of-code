@@ -57,19 +57,27 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            
+            // Fetch the PR data to get the latest SHA
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: issue_number,
+            });
+            
+            const head_sha = pr.head.sha;
             
             await github.rest.checks.create({
               owner,
               repo,
               name: 'CCTP Tests',
-              head_sha: context.payload.comment.commit_id,
+              head_sha: head_sha,
               status: 'completed',
-              conclusion: '${{ job.status }}',
+              conclusion: '${{ needs.build.result }}',
               output: {
                 title: 'CCTP Tests Result',
                 summary: 'The CCTP tests have completed.',
                 text: 'Check the workflow run for more details.'
               }
             });
-
-            OWNER
