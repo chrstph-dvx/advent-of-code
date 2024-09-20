@@ -36,7 +36,7 @@ jobs:
       && needs.load-files.outputs.matrix == 'azerty2'
     steps:
       - name: test
-        run: echo "build running"
+        run: echo "build running 2"
         
 
   # test-e2e-success:
