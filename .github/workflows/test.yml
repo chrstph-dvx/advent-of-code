@@ -1,0 +1,35 @@
+name: PR approved workflow
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  debug-log:
+    name: "debug test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "step"
+        run: |
+          echo ${{ github.event.comment.body }}
+          echo ${{ github.event.comment.author_association }}
+
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    if: >
+      ${{ github.event.comment.body == '/run-cctp-tests' }} && ${{ contains(github.event.comment.html_url, '/pull/') }}
+    steps:
+      - name: test
+        run: echo "build running"
+        
+
+  test-e2e-success:
+    name: "Test E2E Success"
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Regular E2E Succeeded
+        if: ${{ github.event.comment.body == '/run-cctp-tests' }} && ${{ contains(github.event.comment.html_url, '/pull/') }}
+        run: echo "test"
